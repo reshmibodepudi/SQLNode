@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>User Dashboard</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Articles</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -53,11 +53,10 @@
   </style>
 </head>
 <body>
-  <h1>Welcome, <%= user.username %></h1>
-  <h2>Your Articles:</h2>
+  <h1>Articles for <%= user.username %></h1>
   <ul>
     <% articles.forEach(article => { %>
-      <li><strong><%= article.title %></strong>: <%= article.content %></li>
+      <li><strong><%= article.title %>:</strong> <%= article.content %></li>
     <% }) %>
   </ul>
   <a href="/user/<%= user.id %>/articles/new">Add New Article</a>

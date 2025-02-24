@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Home Page</title>
+  <title>Add New Article</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -13,8 +13,16 @@
     h1 {
       color: #333;
     }
-    h2 {
-      color: #666;
+    form {
+      display: inline-block;
+      margin-top: 20px;
+    }
+    input, textarea {
+      display: block;
+      padding: 10px;
+      margin-bottom: 10px;
+      width: 100%;
+      max-width: 500px;
     }
     button {
       padding: 10px 20px;
@@ -30,13 +38,11 @@
   </style>
 </head>
 <body>
-  <h1>Hi, Welcome!</h1>
-  <h2>
-    Become a part of our vibrant community of
-    <b style="color: red"><%= count %></b> users
-  </h2>
-  <form method="GET" action="/user/new">
-    <button>Join Today!</button>
+  <h1>Add New Article</h1>
+  <form action="/user/<%= user.id %>/articles" method="POST">
+    <input name="title" type="text" placeholder="Enter title" required />
+    <textarea name="content" placeholder="Enter content" required></textarea>
+    <button>Submit</button>
   </form>
 </body>
 </html>

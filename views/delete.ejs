@@ -1,15 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Delete User</title>
-  </head>
-  <body>
-    <h3>To delete this user : <%= user.email %> , enter the password</h3>
-    <form method="post" action="/user/<%= user.id%>?_method=DELETE">
-      <input placeholder="enter password to delete" name="password" />
-      <button>Delete</button>
-    </form>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Delete User</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f0f0f0;
+    }
+    h3 {
+      color: #333;
+    }
+    form {
+      display: inline-block;
+      margin-top: 20px;
+    }
+    input {
+      display: block;
+      padding: 10px;
+      margin-bottom: 10px;
+      width: 100%;
+      max-width: 300px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #c82333;
+    }
+  </style>
+</head>
+<body>
+  <h3>To delete this user: <%= user.email %>, enter the password</h3>
+  <form method="post" action="/user/<%= user.id %>?_method=DELETE">
+    <input placeholder="Enter password to delete" name="password" />
+    <button>Delete</button>
+  </form>
+</body>
 </html>

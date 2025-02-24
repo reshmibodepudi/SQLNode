@@ -33,7 +33,6 @@ let connection = mysql.createConnection({
 
 // My routes...
 
-
 app.get("/", (req, res) => {
   let q = `SELECT count(*) FROM user`;
   try {
@@ -109,29 +108,113 @@ app.get("/user/new", (req, res) => {
   res.render("new.ejs");
 });
 
+
 app.post("/user/new", (req, res) => {
-    let { username, email, password } = req.body;
-    let id = uuidv4();
+  let { username, email, password } = req.body;
+  let id = uuidv4();
 
-    // Query to insert new user
-    let q = `INSERT INTO user (id, username, email, password) VALUES (?, ?, ?, ?)`;
+  // Query to insert new user
+  let q = `INSERT INTO user (id, username, email, password) VALUES (?, ?, ?, ?)`;
 
-    try {
-        connection.query(q, [id, username, email, password], (err, result) => {
-            if (err) throw err;
-            
-            // Query to get the newly created user
-            connection.query('SELECT * FROM user WHERE id = ?', [id], (err, result) => {
-                if (err) throw err;
+  try {
+    connection.query(q, [id, username, email, password], (err, result) => {
+      if (err) throw err;
+      
+      // Query to get the newly created user
+      connection.query('SELECT * FROM user WHERE id = ?', [id], (err, result) => {
+        if (err) throw err;
+        
+        let user = result[0];
 
-                let user = result[0];
-                res.render('signedin', { user });
-            });
+        // Fetch user's articles
+        connection.query('SELECT * FROM articles WHERE user_id = ?', [id], (err, articles) => {
+          if (err) throw err;
+          res.render('signedin.ejs', { user, articles });
         });
+      });
+    });
   } catch (err) {
     res.send("some error occurred");
   }
 });
+
+// Login route
+app.get("/login", (req, res) => {
+  res.render("login.ejs");
+});
+
+app.post("/login", (req, res) => {
+  const { email, password } = req.body;
+  const userQuery = 'SELECT * FROM user WHERE email = ? AND password = ?';
+  const articlesQuery = 'SELECT * FROM articles WHERE user_id = ?';
+  try {
+      connection.execute(userQuery, [email, password], (err, userResults) => {
+          if (err) throw err;
+          if (userResults.length > 0) {
+              const user = userResults[0];
+              connection.execute(articlesQuery, [user.id], (err, articlesResults) => {
+                  if (err) throw err;
+                  res.render("signedin.ejs", { user, articles: articlesResults });
+              });
+          } else {
+              res.send("Invalid email or password");
+          }
+      });
+  } catch (err) {
+      res.send("Some error occurred");
+  }
+});
+
+// Articles routes
+app.get("/user/:id/articles", (req, res) => {
+  const { id } = req.params;
+  const userQuery = 'SELECT * FROM user WHERE id = ?';
+  const articlesQuery = 'SELECT * FROM articles WHERE user_id = ?';
+
+  try {
+      connection.execute(userQuery, [id], (err, userResults) => {
+          if (err) throw err;
+          const user = userResults[0];
+          connection.execute(articlesQuery, [id], (err, articlesResults) => {
+              if (err) throw err;
+              res.render("articles.ejs", { user, articles: articlesResults });
+          });
+      });
+  } catch (err) {
+      res.send("Some error occurred");
+  }
+});
+
+app.get("/user/:id/articles/new", (req, res) => {
+  const { id } = req.params;
+  const userQuery = 'SELECT * FROM user WHERE id = ?';
+
+  try {
+      connection.execute(userQuery, [id], (err, userResults) => {
+          if (err) throw err;
+          const user = userResults[0];
+          res.render("new_article.ejs", { user });
+      });
+  } catch (err) {
+      res.send("Some error occurred");
+  }
+});
+
+app.post("/user/:id/articles", (req, res) => {
+  const { id } = req.params;
+  const { title, content } = req.body;
+  const articleQuery = 'INSERT INTO articles (user_id, title, content) VALUES (?, ?, ?)';
+
+  try {
+      connection.execute(articleQuery, [id, title, content], (err, result) => {
+          if (err) throw err;
+          res.redirect(`/user/${id}/articles`);
+      });
+  } catch (err) {
+      res.send("Some error occurred");
+  }
+});
+
 
 app.get("/user/:id/delete", (req, res) => {
   let { id } = req.params;
@@ -177,35 +260,35 @@ app.delete("/user/:id/", (req, res) => {
   }
 });
 
-
-//sigin
-
-app.get("/signin", (req, res) => {
-    res.render("signin.ejs");
-  });
-
-app.post("/signin", (req, res) => {
-    const { email, password } = req.body;
-    const query = 'SELECT * FROM user WHERE email = ? AND password = ?';
-    try {
-        connection.execute(query, [email, password], (err, results) => {
-        if (err) throw err;
-        let user = results[0];
-        if (user.email && user.password != password) {
-            res.send("WRONG details entered!");
-          } else {
-        console.log(user);
-        res.render("signedin.ejs", { user });}
-      });
-    } catch (err) {
-      res.send("some error with DB");
-    }
-  });
   //sigout
   app.post("/signout", (req,res) => {
-    res.redirect("/signin");
+    res.redirect("/login");
   });
 
 app.listen("8080", () => {
   console.log("server running on port 8080");
 });
+
+//sigin
+
+// app.get("/signin", (req, res) => {
+//     res.render("signin.ejs");
+//   });
+
+// app.post("/signin", (req, res) => {
+//     const { email, password } = req.body;
+//     const query = 'SELECT * FROM user WHERE email = ? AND password = ?';
+//     try {
+//         connection.execute(query, [email, password], (err, results) => {
+//         if (err) throw err;
+//         let user = results[0];
+//         if (user.email && user.password != password) {
+//             res.send("WRONG details entered!");
+//           } else {
+//         console.log(user);
+//         res.render("signedin.ejs", { user });}
+//       });
+//     } catch (err) {
+//       res.send("some error with DB");
+//     }
+//   });
